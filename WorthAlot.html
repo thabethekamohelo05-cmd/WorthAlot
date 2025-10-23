@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WorthAlot — Mixed Goods Marketplace</title>
+  <style>
+    :root{--accent:#0f62fe;--muted:#6b7280;--bg:#f7f7fa;--card:#ffffff}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:var(--bg);color:#111}
+    header{background:linear-gradient(90deg,#ffffff 0%, #f3f6ff 100%);border-bottom:1px solid #e6e9f2;padding:12px 20px;position:sticky;top:0;z-index:40}
+    .container{max-width:1100px;margin:0 auto}
+    .nav{display:flex;align-items:center;gap:16px}
+    .logo{display:flex;align-items:center;gap:12px;font-weight:700}
+    .logo svg{width:44px;height:44px}
+    nav a{color:#111;text-decoration:none;padding:8px;border-radius:8px}
+    nav a:hover{background:#eef2ff}
+    .search{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .search input{padding:8px 10px;border-radius:10px;border:1px solid #d6d9e6;min-width:180px}
+    main{padding:24px 20px}
+    .hero{display:flex;gap:24px;align-items:center}
+    .hero .intro{flex:1}
+    .hero h1{margin:0 0 8px;font-size:28px}
+    .hero p{margin:0;color:var(--muted)}
+    .layout{display:grid;grid-template-columns:240px 1fr;gap:20px;margin-top:20px}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 2px 6px rgba(16,24,40,0.04)}
+    .categories button{display:block;width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #eef2ff;background:transparent;text-align:left}
+    .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+    .product{display:flex;flex-direction:column;gap:10px}
+    .product .thumb{height:150px;border-radius:10px;background:linear-gradient(135deg,#f8fafc,#eef2ff);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--muted)}
+    .price{font-weight:700}
+    .muted{color:var(--muted);font-size:13px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:#fff;text-decoration:none;cursor:pointer}
+    .btn.secondary{background:transparent;border:1px solid #d6d9e6;color:#111}
+    .cart-btn{position:relative}
+    .cart-count{position:absolute;right:-6px;top:-6px;background:#ff3b30;color:#fff;border-radius:99px;padding:4px 7px;font-size:12px}
+    footer{padding:20px;border-top:1px solid #e6e9f2;margin-top:40px;background:#fff}
+    /* Cart drawer */
+    .drawer{position:fixed;right:18px;bottom:18px;background:var(--card);width:360px;max-width:calc(100% - 36px);border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.2);overflow:hidden;display:flex;flex-direction:column;min-height:80px}
+    .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #eef2ff}
+    .drawer-body{padding:12px;flex:1;overflow:auto}
+    .drawer-footer{padding:12px;border-top:1px solid #eef2ff}
+    .cart-item{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed #f1f4fb}
+    .qty{display:flex;gap:6px;align-items:center}
+    /* Checkout */
+    .checkout{max-width:760px;margin:0 auto}
+    .checkout form{display:grid;grid-template-columns:1fr 320px;gap:16px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    input,select,textarea{padding:10px;border-radius:8px;border:1px solid #e6e9f2}
+    .success{background:linear-gradient(90deg,#e6ffef,#f0fff6);padding:16px;border-radius:10px;border:1px solid #dff6e8}
+    /* Responsive */
+    @media (max-width:900px){.layout{grid-template-columns:1fr}.search input{min-width:110px}.checkout form{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="logo" aria-label="WorthAlot logo">
+        <!-- Simple SVG logo -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1">
+              <stop offset="0" stop-color="#0f62fe"/>
+              <stop offset="1" stop-color="#4f46e5"/>
+            </linearGradient>
+          </defs>
+          <rect rx="10" width="64" height="64" fill="url(#g)" />
+          <text x="32" y="38" font-family="Segoe UI, Roboto" font-weight="700" font-size="30" fill="#fff" text-anchor="middle">W</text>
+        </svg>
+        <div>
+          <div style="font-size:16px">WorthAlot</div>
+          <div style="font-size:12px;color:var(--muted)">Mixed goods • Great value</div>
+        </div>
+      </div>
+
+      <nav style="margin-left:16px">
+        <a href="#home">Home</a>
+        <a href="#catalog">Catalog</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="search">
+        <input id="q" placeholder="Search products..." />
+        <button class="btn" id="openCart">Cart <span id="cartCount" class="cart-count" style="display:none">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="home">
+    <section class="hero">
+      <div class="intro">
+        <h1>Welcome to WorthAlot — Great brands, great prices</h1>
+        <p class="muted">A mixed goods marketplace combining convenience and curated quality. Browse electronics, fashion, homeware, groceries & more.</p>
+        <div style="margin-top:12px"><a href="#catalog" class="btn">Shop now</a></div>
+      </div>
+      <div style="width:260px" class="card">
+        <strong>Fast delivery</strong>
+        <p class="muted">Local shipping & reliable returns. Safe checkout powered by the mock pay point below.</p>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside>
+        <div class="card">
+          <h3>Categories</h3>
+          <div class="categories" id="categories"></div>
+          <hr style="margin:12px 0" />
+          <h4>Price filter</h4>
+          <input id="maxPrice" type="range" min="10" max="2000" value="2000" />
+          <div class="muted">Max: R<span id="maxPriceVal">2000</span></div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>About WorthAlot</h4>
+          <p class="muted">WorthAlot mixes the convenience of an online marketplace with curated products you can trust. Competitive pricing and honest service.</p>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>Contact</h4>
+          <p class="muted">Email: <a href="mailto:worthalot.com">worthalot.com</a><br/>Phone: +27 11 345 6789</p>
+        </div>
+      </aside>
+
+      <section>
+<section class="card" style="margin:20px 0;text-align:center">
+  <h3>Catalogue</h3>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:20px;margin-top:12px">
+    <div>
+      <img src="C:\Users\Admin\Downloads\WEBSITE\889609_2c52ce0542c44ca4b549d96dbb8dfc6f~mv2.avif" alt="Craft Coffee Beans" style="border-radius:12px;width:150px;height:150px;object-fit:cover" />
+      <div class="muted">Craft Coffee Beans</div>
+ <div class="muted">R66.99</div>
+
+    </div>
+    <div>
+      <img src="C:\Users\Admin\Downloads\WEBSITE\aroma-1686205753325_2048x2048.webp"alt="Organic Olive Oil" style="border-radius:12px;width:150px;height:150px;object-fit:cover" />
+      <div class="muted">Organic Olive Oil</div>
+      <div class="muted">R69.99</div>
+</div>
+    <div>
+      <img src="C:\Users\Admin\Downloads\WEBSITE\31rb2rG2k8L._SY1000_.jpg"alt="Headphones" style="border-radius:12px;width:150px;height:150px;object-fit:cover" />
+      <div class="muted">Headphones</div>
+      <div class="muted">R149.99</div>
+
+
+</div>
+    <div>
+      <img src="C:\Users\Admin\Downloads\WEBSITE\sunlight.png"alt="Sunlight" style="border-radius:12px;width:150px;height:150px;object-fit:cover" />
+      <div class="muted">Sunlight Liquid</div>
+      <div class="muted">R39.99</div>
+</div>
+    <div>
+      <img src="C:\Users\Admin\Downloads\WEBSITE\ChatGPTImageAug23_2025_10_03_57AM.webp"alt="Stationary set" style="border-radius:12px;width:150px;height:150px;object-fit:cover" />
+      <div class="muted">Pencil case set</div>
+      <div class="muted">R39.99</div>
+
+
+
+    </div>
+    <div>
+      <img src="C:\Users\Admin\Downloads\WEBSITE\download (1).jpg"alt="Ceramic Cookware Set" style="border-radius:12px;width:150px;height:150px;object-fit:cover" />
+      <div class="muted">Ceramic Cookware</div>
+       <div class="muted">R999.99</div>
+
+</div>
+    <div>
+      <img src="C:\Users\Admin\Downloads\raja.jpg"alt="Herbs" style="border-radius:12px;width:150px;height:150px;object-fit:cover" />
+      <div class="muted">Herbs</div>
+       <div class="muted">R9.99</div>
+
+
+    </div>
+    <div>
+      <img src="C:\Users\Admin\Downloads\WEBSITE\download.jpg" alt="Electric Toothbrush" style="border-radius:12px;width:150px;height:150px;object-fit:cover" />
+      <div class="muted">Electric Toothbrush</div>
+       <div class="muted">R80.00</div>
+
+    </div>
+  </div>
+
+
+        <div id="catalog" class="card">
+         
+        <div id="checkoutSection" style="display:none;margin-top:16px" class="card checkout">
+          <h3>Checkout</h3>
+          <div id="checkoutContent"></div>
+        </div>
+<h4>Payment</h4>
+
+<!-- Payment provider badge -->
+<div style="display:flex;align-items:center;gap:10px;margin:10px 0 16px 0">
+  <img src= "C:\Users\Admin\Downloads\WEBSITE\images.png"alt="PCI DSS" style="height:28px" />
+  <strong style="color:var(--accent)">Secure Pay Point</strong>
+  <span class="muted">PCI-DSS Compliant (Demo)</span>
+</div>
+
+<!-- Payment logos -->
+<div style="display:flex;gap:12px;margin-bottom:16px;align-items:center">
+  <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" height="28" />
+  <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" alt="MasterCard" height="28" />
+  <img src="https://img.icons8.com/color/48/000000/amex.png" alt="Amex" height="28" />
+  <img src="https://img.icons8.com/color/48/000000/paypal.png" alt="PayPal" height="28" />
+</div>
+
+<form id="payForm">
+  <div class="field">
+    <label>Name on card</label>
+    <input required id="cardName" placeholder="John Doe" />
+  </div>
+
+  <div class="field">
+    <label>Card number</label>
+    <input required id="cardNum" maxlength="19" placeholder="1234 5678 9012 3456" />
+  </div>
+
+  <div style="display:flex;gap:8px">
+    <div style="flex:1" class="field">
+      <label>Expiry</label>
+      <input required id="cardExp" placeholder="MM/YY" />
+    </div>
+    <div style="width:140px" class="field">
+      <label>CVV</label>
+      <input required id="cardCvv" maxlength="4" placeholder="123" />
+    </div>
+  </div>
+
+  <!-- Pay Now Button -->
+  <div style="margin-top:12px">
+    <button class="btn" type="submit">Pay Now — R ${formatR(cartTotal())}</button>
+  </div>
+</form>
+
+<!-- OR Pay with PayPal button (mock only) -->
+<div style="margin-top:16px;text-align:center">
+  <button class="btn secondary" onclick="alert('PayPal checkout coming soon (demo)')">
+    <img src="https://img.icons8.com/ios-filled/24/000000/paypal.png" style="vertical-align:middle;margin-right:6px" />
+    Pay with PayPal
+  </button>
+</div>
+
+</div>
+
+        <div id="about" class="card" style="margin-top:16px">
+          <h3>About Us</h3>
+          <p>At Worthalot, we understand that real value goes beyond money — it’s found in purpose, honesty, and the difference we make. Built on the belief that everyone deserves to feel empowered and fulfilled, we provide services and solutions designed to enhance your financial journey and help you reach your greatest potential.
+
+Whether you’re growing your wealth, starting a business, or exploring better ways to achieve success, Worthalot is your reliable partner. Our name reflects our mission — to show that your assets, aspirations, and actions truly are worth a lot..</p>
+        </div>
+
+        <div id="contact" class="card" style="margin-top:16px">
+          <h3>Contact Us</h3>
+          <form id="contactForm">
+        <p>+27 67 819 8368</p>
+          </div>
+
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong>WorthAlot</strong> — Mixed goods marketplace • © <span id="year"></span>
+      </div>
+      <div class="muted">WorthAlot</div>
+    </div>
+  </footer>
+
+  <!-- Cart Drawer (hidden until needed) -->
+  <div id="cartDrawer" class="drawer" style="display:none">
+    <div class="drawer-header">
+      <div><strong>Your cart</strong></div>
+      <div><button id="closeCart" class="btn secondary">Close</button></div>
+    </div>
+    <div class="drawer-body" id="cartItems"></div>
+    <div class="drawer-footer">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>Total: R<span id="cartTotal">0</span></strong></div>
+        <div><button class="btn" id="checkoutBtn">Checkout</button></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// --- Data: sample mixed products ---
+const PRODUCTS = [
+  {id:1,name:'Wireless Headphones',category:'Electronics',price:1299,desc:'Over-ear, noise-cancelling.'},
+  {id:2,name:'Smartphone 128GB',category:'Electronics',price:7999,desc:'Fast processor, great camera.'},
+  {id:3,name:'Blue Denim Jacket',category:'Fashion',price:499,desc:'Stylish, unisex.'},
+  {id:4,name:'Running Shoes',category:'Fashion',price:899,desc:'Comfort & traction.'},
+  {id:5,name:'Ceramic Cookware Set',category:'Home',price:1299,desc:'Non-stick, 6 pieces.'},
+  {id:6,name:'Bamboo Bed Sheets',category:'Home',price:699,desc:'Breathable, king size.'},
+  {id:7,name:'Organic Olive Oil 1L',category:'Grocery',price:149,desc:'Cold-pressed extra virgin.'},
+  {id:8,name:'Craft Coffee Beans 500g',category:'Grocery',price:99,desc:'Single-origin roast.'},
+  {id:9,name:'Vitamin C Serum',category:'Beauty',price:239,desc:'For glowing skin.'},
+  {id:10,name:'Electric Toothbrush',category:'Beauty',price:349,desc:'2-minute timer.'}
+];
+
+// --- Utilities ---
+const formatR = n => n.toLocaleString('en-ZA');
+
+// --- DOM refs ---
+const productList = document.getElementById('productList');
+const categoriesEl = document.getElementById('categories');
+const maxPrice = document.getElementById('maxPrice');
+const maxPriceVal = document.getElementById('maxPriceVal');
+const q = document.getElementById('q');
+const cartCount = document.getElementById('cartCount');
+const cartDrawer = document.getElementById('cartDrawer');
+const cartItemsEl = document.getElementById('cartItems');
+const cartTotalEl = document.getElementById('cartTotal');
+const openCart = document.getElementById('openCart');
+const closeCart = document.getElementById('closeCart');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const checkoutSection = document.getElementById('checkoutSection');
+const checkoutContent = document.getElementById('checkoutContent');
+const showAll = document.getElementById('showAll');
+const viewCartPage = document.getElementById('viewCartPage');
+const yearEl = document.getElementById('year');
+const contactForm = document.getElementById('contactForm');
+const contactStatus = document.getElementById('contactStatus');
+
+// --- Cart state stored in localStorage ---
+const CART_KEY = 'worthalot_cart_v1';
+let cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
+
+function saveCart(){localStorage.setItem(CART_KEY, JSON.stringify(cart));renderCartCount();}
+function addToCart(id,qty=1){cart[id] = (cart[id]||0)+qty; saveCart();}
+function removeFromCart(id){delete cart[id]; saveCart();}
+function updateQty(id,qty){if(qty<=0) removeFromCart(id); else cart[id]=qty; saveCart();}
+
+function cartItems(){return Object.entries(cart).map(([id,qty])=>{const p=PRODUCTS.find(x=>x.id==id);return {...p,qty}})}
+function cartTotal(){return cartItems().reduce((s,i)=>s+i.price*i.qty,0)}
+
+function renderCategories(){const cats=[...new Set(PRODUCTS.map(p=>p.category))];categoriesEl.innerHTML='';cats.forEach(c=>{const b=document.createElement('button');b.textContent=c;b.onclick=()=>renderProducts({category:c});categoriesEl.appendChild(b)});}
+
+function renderProducts({category=null,query=null,maxP=null}={}){
+  productList.innerHTML='';
+  let list = PRODUCTS.slice();
+  if(category) list = list.filter(p=>p.category===category);
+  if(query) list = list.filter(p=>p.name.toLowerCase().includes(query.toLowerCase())||p.desc.toLowerCase().includes(query.toLowerCase()));
+  if(maxP) list = list.filter(p=>p.price<=maxP);
+  if(list.length===0) productList.innerHTML='<div class="muted">No products found</div>';
+  list.forEach(p=>{
+    const el=document.createElement('div');el.className='product card';
+    el.innerHTML = `
+      <div class="thumb">${p.name}</div>
+      <div><strong>${p.name}</strong><div class="muted">${p.desc}</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="price"</div>
+          <div class="muted">Category: ${p.category}</div>
+        </div>
+        <div>
+          <button class="btn" data-id="${p.id}">Add</button>
+        </div>
+      </div>`;
+    productList.appendChild(el);
+  });
+  // wire add buttons
+  productList.querySelectorAll('button[data-id]').forEach(b=>b.onclick=()=>{addToCart(b.dataset.id*1); alert('Added to cart');});
+}
+
+function renderCartCount(){const count = Object.values(cart).reduce((s,n)=>s+n,0); if(count>0){cartCount.style.display='inline-block';cartCount.textContent=count;} else cartCount.style.display='none';}
+
+function renderCartDrawer(){cartItemsEl.innerHTML='';const items=cartItems(); if(items.length===0){cartItemsEl.innerHTML='<div class="muted">Your cart is empty</div>';} else {
+  items.forEach(it=>{
+    const div=document.createElement('div');div.className='cart-item';
+    div.innerHTML = `
+      <div style="width:56px;height:56px;border-radius:8px;background:#f3f6ff;display:flex;align-items:center;justify-content:center">${it.name.split(' ').slice(0,2).map(x=>x[0]).join('')}</div>
+      <div style="flex:1">
+        <div><strong>${it.name}</strong></div>
+        <div class="muted">R ${formatR(it.price)} • ${it.category}</div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <div class="qty"><button class="btn secondary" data-action="dec" data-id="${it.id}">-</button><div style="padding:6px 8px;border-radius:6px;border:1px solid #eef2ff">${it.qty}</div><button class="btn secondary" data-action="inc" data-id="${it.id}">+</button></div>
+          <button class="btn secondary" data-action="rm" data-id="${it.id}">Remove</button>
+        </div>
+      </div>`;
+    cartItemsEl.appendChild(div);
+  });
+}
+cartTotalEl.textContent = formatR(cartTotal());
+// attach actions
+cartItemsEl.querySelectorAll('button[data-action]').forEach(b=>{
+  const id = b.dataset.id*1; const a=b.dataset.action;
+  b.onclick = ()=>{
+    if(a==='inc') updateQty(id,(cart[id]||0)+1);
+    if(a==='dec') updateQty(id,(cart[id]||0)-1);
+    if(a==='rm') removeFromCart(id);
+    renderCartDrawer();
+  }
+});
+}
+
+// --- Events ---
+q.addEventListener('input',e=>renderProducts({query:e.target.value,maxP:parseInt(maxPrice.value)}));
+maxPrice.addEventListener('input',e=>{maxPriceVal.textContent=e.target.value; renderProducts({query:q.value,maxP:parseInt(e.target.value)});});
+openCart.onclick = ()=>{cartDrawer.style.display='flex'; renderCartDrawer();}
+closeCart.onclick = ()=>cartDrawer.style.display='none';
+checkoutBtn.onclick = ()=>{cartDrawer.style.display='none'; openCheckout();}
+showAll.onclick = ()=>renderProducts({maxP:parseInt(maxPrice.value)});
+viewCartPage.onclick = ()=>{cartDrawer.style.display='flex'; renderCartDrawer();}
+
+function openCheckout(){checkoutSection.style.display='block'; renderCheckout(); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});}
+
+function renderCheckout(){const items=cartItems(); if(items.length===0){checkoutContent.innerHTML='<div class="muted">Your cart is empty — add items before checkout</div>'; return;} let html=`<div style="display:flex;gap:16px;flex-direction:column">
+  <div>
+    <h4>Order summary</h4>
+    <div style="border:1px solid #eef2ff;padding:12px;border-radius:8px">
+      ${items.map(it=><div style="display:flex;justify-content:space-between;padding:6px 0"><div>${it.name} x${it.qty}</div><div>R ${formatR(it.price*it.qty)}</div></div>).join('')}
+      <hr style="margin:8px 0">
+      <div style="display:flex;justify-content:space-between"><strong>Total</strong><strong>R ${formatR(cartTotal())}</strong></div>
+    </div>
+  </div>
+  <div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
+  <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" height="28" />
+  <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" alt="MasterCard" height="28" />
+  <img src="https://img.icons8.com/color/48/000000/amex.png" alt="Amex" height="28" />
+</div>
+  </div>
+</div>`;
+checkoutContent.innerHTML = html;
+// wire pay form
+const payForm = document.getElementById('payForm');
+payForm.onsubmit = (ev)=>{
+  ev.preventDefault();
+  // simple mock validation
+  const name = document.getElementById('cardName').value.trim();
+  const num = document.getElementById('cardNum').value.replace(/\s+/g,'');
+  if(num.length<12){alert('Enter a valid card number (mock)');return}
+  // simulate payment
+  checkoutContent.innerHTML = <div class="success"><strong>Payment successful</strong><p class="muted">Thank you, ${name}. Your order (mock) has been placed. Order total: R ${formatR(cartTotal())}.</p><div style="margin-top:8px"><button class="btn" id="done">Back to shop</button></div></div>;
+  // clear cart
+  cart = {}; saveCart();
+  document.getElementById('done').onclick = ()=>{checkoutSection.style.display='none'; renderProducts({maxP:parseInt(maxPrice.value)});}
+};
+}
+
+// contact form
+contactForm.onsubmit = (e)=>{e.preventDefault();contactStatus.innerHTML='<div class="muted">Sending message (demo)...</div>'; setTimeout(()=>{contactStatus.innerHTML='<div class="success">Thanks — we will reply to your email shortly.</div>'; contactForm.reset();},800)}
+
+// init
+renderCategories();renderProducts({maxP:parseInt(maxPrice.value)});renderCartCount();yearEl.textContent=new Date().getFullYear();
+
+// accessibility: keyboard support for cart
+window.addEventListener('keydown',e=>{if(e.key==='c') openCart.click()});
+
+</script>
+</body>
+</html>
